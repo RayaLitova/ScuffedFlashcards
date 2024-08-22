@@ -51,22 +51,22 @@ def generate_cards(pdf_path, output_file):
         page_count = len(reader.pages)
         
         for i in range(page_count):
-            if unprocessed and i%2 == 0:
-                data["Unprocessed"].append(i)
-                available["Unprocessed"].append(i)
             page = reader.get_page(i)
             right = page.mediabox.right
             top = page.mediabox.top
-            for i in range(4):
+            for j in range(4):
                 page.mediabox.lower_left = (
-                    (right / 2) + (i % 2) * (right / 2),
-                    (top / 2) + (0 if i < 2 else 1) * (top / 2),
+                    (right / 2) + (j % 2) * (right / 2),
+                    (top / 2) + (0 if j < 2 else 1) * (top / 2),
                 )
                 page.mediabox.upper_right = (
-                    (i % 2) * (right / 2),
-                    (0 if i < 2 else 1) * (top / 2),
+                    (j % 2) * (right / 2),
+                    (0 if j < 2 else 1) * (top / 2),
                 )
                 writer.add_page(page)
+                if unprocessed and j%2 == 0:
+                    data["Unprocessed"].append(i*4 + j)
+                    available["Unprocessed"].append(i*4 + j)
 
         with open(output_file, "wb") as out_f:
             writer.write(out_f)
@@ -102,10 +102,12 @@ def select_next_question():
         page_number = random.choice(available["Unprocessed"])
         available["Unprocessed"].remove(page_number)
         return
-    level = ["Hard"] * 100 * len(available["Hard"]) + ["Medium"] * 60 * len(available["Medium"]) + ["Easy"] * 15 * len(available["Easy"])
-    level = random.choice(level)
     if len(available["Hard"]) == 0 and len(available["Medium"]) == 0 and len(available["Easy"]) == 0 and len(available["Unprocessed"]) == 0:
         available = data
+        print("yay!")
+        
+    level = ["Hard"] * 100 * len(available["Hard"]) + ["Medium"] * 60 * len(available["Medium"]) + ["Easy"] * 15 * len(available["Easy"])
+    level = random.choice(level)
     page_number = random.choice(available[level])
     available[level].remove(page_number)
 
